@@ -11,4 +11,5 @@ import com.agprogramming.seom_v2_bff.models.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByEmail(String email);
 	Boolean existsByEmail(String email);
+	Boolean existsByCuil(String cuil);
 }

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.agprogramming.seom_v2_bff.exceptions.CuilAlreadyRegisteredException;
 import com.agprogramming.seom_v2_bff.exceptions.EmailAlreadyInUseException;
 import com.agprogramming.seom_v2_bff.exceptions.UnexistingRefreshTokenException;
 import com.agprogramming.seom_v2_bff.models.RefreshToken;
@@ -75,7 +76,9 @@ public class AuthController {
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+		if (userRepository.existsByCuil(signUpRequest.getCuil()) ) {
+			throw new CuilAlreadyRegisteredException("/auth/signup");
+		} else if (userRepository.existsByEmail(signUpRequest.getEmail())) {
 			throw new EmailAlreadyInUseException("/auth/signup");
 		}
 
@@ -108,8 +111,10 @@ public class AuthController {
 
 		user.setRoles(roles);
 		userRepository.save(user);
+		
+		return authenticateUser(new LoginRequest(signUpRequest.getEmail(), signUpRequest.getPassword()));
 
-		return ResponseEntity.ok(new MessageResponse("User created successfully"));
+		//return ResponseEntity.ok(new MessageResponse("User created successfully"));
 	}
 
 	@PostMapping("/refreshtoken")
@@ -128,11 +133,17 @@ public class AuthController {
 		refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 		return ResponseEntity.ok(new MessageResponse("Log out successful!"));
 	}
+	
+	@ExceptionHandler(CuilAlreadyRegisteredException.class)
+	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(CuilAlreadyRegisteredException exception) {
+		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
+				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
+	}
 
 	@ExceptionHandler(EmailAlreadyInUseException.class)
 	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(EmailAlreadyInUseException exception) {
 		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.UNAUTHORIZED);
+				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(UnexistingRefreshTokenException.class)

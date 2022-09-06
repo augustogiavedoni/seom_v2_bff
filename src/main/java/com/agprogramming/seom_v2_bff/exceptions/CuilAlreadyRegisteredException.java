@@ -4,14 +4,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class EmailAlreadyInUseException extends MainException {
+public class CuilAlreadyRegisteredException extends MainException{
 	private static final long serialVersionUID = 1L;
-	public static final String error = "email-already-in-use";
-	public static final String description = "The email is already in use";
+	public static final String error = "cuil-already-registered";
+	public static final String description = "The CUIL is already registered";
 	public static final int status = 400;
 	
 
-	public EmailAlreadyInUseException(String path) {
+	public CuilAlreadyRegisteredException(String path) {
 		super(path, error, description, status);
 	}
 }

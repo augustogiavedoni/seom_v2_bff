@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 import lombok.*;
 
 @Entity
-@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email") })
+@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = { "email", "cuil" }) })
 @Data
 @NoArgsConstructor
 public class User {
