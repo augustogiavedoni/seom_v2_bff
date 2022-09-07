@@ -1,6 +1,7 @@
 package com.agprogramming.seom_v2_bff.security.services;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -15,13 +16,22 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 	private Long id;
+	private String firstName;
+	private String lastName;
+	private String cuil;
+	private Date birthdate;
 	private String email;
 	@JsonIgnore
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+	public UserDetailsImpl(Long id, String firstName, String lastName, String cuil, Date birthdate, String email,
+			String password, Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.cuil = cuil;
+		this.birthdate = birthdate;
 		this.email = email;
 		this.password = password;
 		this.authorities = authorities;
@@ -30,12 +40,24 @@ public class UserDetailsImpl implements UserDetails {
 	public static UserDetailsImpl build(User user) {
 		List<GrantedAuthority> authorities = user.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
-		return new UserDetailsImpl(user.getId(), user.getEmail(), user.getPassword(), authorities);
+		return new UserDetailsImpl(user.getId(), user.getFirstName(), user.getLastName(), user.getCuil(),
+				user.getBirthdate(), user.getEmail(), user.getPassword(), authorities);
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return authorities;
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public String getCuil() {
+		return cuil;
+	}
+
+	public Date getBirthdate() {
+		return birthdate;
 	}
 
 	public Long getId() {
@@ -44,6 +66,11 @@ public class UserDetailsImpl implements UserDetails {
 
 	public String getEmail() {
 		return email;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return authorities;
 	}
 
 	@Override

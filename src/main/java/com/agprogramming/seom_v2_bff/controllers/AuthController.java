@@ -16,11 +16,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.agprogramming.seom_v2_bff.exceptions.CuilAlreadyRegisteredException;
 import com.agprogramming.seom_v2_bff.exceptions.EmailAlreadyInUseException;
@@ -34,7 +34,7 @@ import com.agprogramming.seom_v2_bff.payloads.request.LogoutRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.SignupRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.TokenRefreshRequest;
 import com.agprogramming.seom_v2_bff.payloads.response.ErrorResponse;
-import com.agprogramming.seom_v2_bff.payloads.response.JwtResponse;
+import com.agprogramming.seom_v2_bff.payloads.response.LoginResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.MessageResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.TokenRefreshResponse;
 import com.agprogramming.seom_v2_bff.repository.RoleRepository;
@@ -70,13 +70,14 @@ public class AuthController {
 		List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
 				.collect(Collectors.toList());
 		RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
-		return ResponseEntity
-				.ok(new JwtResponse(jwt, refreshToken.getToken(), userDetails.getId(), userDetails.getEmail(), roles));
+		return ResponseEntity.ok(new LoginResponse(jwt, refreshToken.getToken(), userDetails.getId(),
+				userDetails.getFirstName(), userDetails.getLastName(), userDetails.getCuil(), userDetails.getEmail(),
+				roles, userDetails.getBirthdate()));
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-		if (userRepository.existsByCuil(signUpRequest.getCuil()) ) {
+		if (userRepository.existsByCuil(signUpRequest.getCuil())) {
 			throw new CuilAlreadyRegisteredException("/auth/signup");
 		} else if (userRepository.existsByEmail(signUpRequest.getEmail())) {
 			throw new EmailAlreadyInUseException("/auth/signup");
@@ -111,10 +112,10 @@ public class AuthController {
 
 		user.setRoles(roles);
 		userRepository.save(user);
-		
+
 		return authenticateUser(new LoginRequest(signUpRequest.getEmail(), signUpRequest.getPassword()));
 
-		//return ResponseEntity.ok(new MessageResponse("User created successfully"));
+		// return ResponseEntity.ok(new MessageResponse("User created successfully"));
 	}
 
 	@PostMapping("/refreshtoken")
@@ -133,7 +134,7 @@ public class AuthController {
 		refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 		return ResponseEntity.ok(new MessageResponse("Log out successful!"));
 	}
-	
+
 	@ExceptionHandler(CuilAlreadyRegisteredException.class)
 	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(CuilAlreadyRegisteredException exception) {
 		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
@@ -145,7 +146,7 @@ public class AuthController {
 		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
 				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(UnexistingRefreshTokenException.class)
 	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(UnexistingRefreshTokenException exception) {
 		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
