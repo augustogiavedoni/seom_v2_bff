@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.agprogramming.seom_v2_bff.exceptions.CitizenNotFoundException;
 import com.agprogramming.seom_v2_bff.exceptions.CuilAlreadyRegisteredException;
 import com.agprogramming.seom_v2_bff.exceptions.EmailAlreadyInUseException;
 import com.agprogramming.seom_v2_bff.exceptions.UnexistingRefreshTokenException;
+import com.agprogramming.seom_v2_bff.models.Citizen;
 import com.agprogramming.seom_v2_bff.models.RefreshToken;
 import com.agprogramming.seom_v2_bff.models.Role;
 import com.agprogramming.seom_v2_bff.models.SystemRole;
@@ -37,6 +39,7 @@ import com.agprogramming.seom_v2_bff.payloads.response.ErrorResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.LoginResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.MessageResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.TokenRefreshResponse;
+import com.agprogramming.seom_v2_bff.repository.CitizenRepository;
 import com.agprogramming.seom_v2_bff.repository.RoleRepository;
 import com.agprogramming.seom_v2_bff.repository.UserRepository;
 import com.agprogramming.seom_v2_bff.security.jwt.JwtUtils;
@@ -53,6 +56,8 @@ public class AuthController {
 	UserRepository userRepository;
 	@Autowired
 	RoleRepository roleRepository;
+	@Autowired
+	CitizenRepository citizenRepository;
 	@Autowired
 	PasswordEncoder encoder;
 	@Autowired
@@ -83,10 +88,13 @@ public class AuthController {
 			throw new EmailAlreadyInUseException("/auth/signup");
 		}
 
+		Citizen citizen = citizenRepository.findByCuil(signUpRequest.getCuil())
+				.orElseThrow(() -> new CitizenNotFoundException("/auth/signup"));
+
 		// Create new user's account
 		User user = new User(signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()),
-				signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getBirthdate(),
-				signUpRequest.getCuil());
+				citizen.getFirstName(), citizen.getLastName(), citizen.getBirthdate(),
+				citizen.getCuil());
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet<>();
 
@@ -114,8 +122,6 @@ public class AuthController {
 		userRepository.save(user);
 
 		return authenticateUser(new LoginRequest(signUpRequest.getEmail(), signUpRequest.getPassword()));
-
-		// return ResponseEntity.ok(new MessageResponse("User created successfully"));
 	}
 
 	@PostMapping("/refreshtoken")
@@ -133,6 +139,12 @@ public class AuthController {
 	public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logOutRequest) {
 		refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 		return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+	}
+	
+	@ExceptionHandler(CitizenNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(CitizenNotFoundException exception) {
+		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
+				exception.getMessage(), exception.getStatus()), HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(CuilAlreadyRegisteredException.class)
