@@ -1,6 +1,8 @@
 package com.agprogramming.seom_v2_bff.models;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -35,8 +37,8 @@ public class Vehicle {
 	private int year;
 	
 	@NotBlank
-	@Size(max = 20)
-	private String vehicleType;
+	@Enumerated(EnumType.STRING)
+	private VehicleType vehicleType;
 	
 	@NotBlank
 	@Size(max = 20)
