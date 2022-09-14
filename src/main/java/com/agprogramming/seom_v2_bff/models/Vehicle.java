@@ -1,7 +1,5 @@
 package com.agprogramming.seom_v2_bff.models;
 
-import java.util.Date;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,7 +7,6 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import lombok.AllArgsConstructor;
@@ -17,27 +14,35 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "citizens", uniqueConstraints = { @UniqueConstraint(columnNames = {"cuil" }) })
+@Table(name = "vehicles", uniqueConstraints = { @UniqueConstraint(columnNames = {"licensePlate" }) })
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Citizen {
+public class Vehicle {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-
+	
+	@NotBlank
+	@Size(max = 30)
+	private String make;
+	
 	@NotBlank
 	@Size(max = 50)
-	private String firstName;
-
+	private String model;
+	
 	@NotBlank
-	@Size(max = 50)
-	private String lastName;
-
-	@NotNull
-	private Date birthdate;
-
+	private int year;
+	
+	@NotBlank
+	@Size(max = 20)
+	private String vehicleType;
+	
+	@NotBlank
+	@Size(max = 20)
+	private String licensePlate;
+	
 	@NotBlank
 	@Size(max = 15)
-	private String cuil;
+	private String ownerCuil;
 }
