@@ -7,10 +7,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +23,6 @@ import com.agprogramming.seom_v2_bff.models.ParkingTicket;
 import com.agprogramming.seom_v2_bff.models.Vehicle;
 import com.agprogramming.seom_v2_bff.payloads.request.ChangeParkingStatusRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.StartParkingRequest;
-import com.agprogramming.seom_v2_bff.payloads.response.ErrorResponse;
 import com.agprogramming.seom_v2_bff.repository.ParkingTicketRepository;
 import com.agprogramming.seom_v2_bff.repository.VehicleRepository;
 
@@ -91,23 +88,5 @@ public class VehicleController {
 		vehicleRepository.save(vehicle);
 
 		return ResponseEntity.ok(vehicle);
-	}
-	
-	@ExceptionHandler(VehicleAlreadyParkedException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(VehicleAlreadyParkedException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(VehicleNotFoundException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(VehicleNotFoundException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.NOT_FOUND);
-	}
-
-	@ExceptionHandler(ParkingTicketNotFoundException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(ParkingTicketNotFoundException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.NOT_FOUND);
 	}
 }

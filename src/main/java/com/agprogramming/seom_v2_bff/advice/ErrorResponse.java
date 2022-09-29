@@ -1,4 +1,4 @@
-package com.agprogramming.seom_v2_bff.payloads.response;
+package com.agprogramming.seom_v2_bff.advice;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

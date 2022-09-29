@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +33,6 @@ import com.agprogramming.seom_v2_bff.payloads.request.LoginRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.LogoutRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.SignupRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.TokenRefreshRequest;
-import com.agprogramming.seom_v2_bff.payloads.response.ErrorResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.LoginResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.MessageResponse;
 import com.agprogramming.seom_v2_bff.payloads.response.TokenRefreshResponse;
@@ -139,29 +136,5 @@ public class AuthController {
 	public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logOutRequest) {
 		refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 		return ResponseEntity.ok(new MessageResponse("Log out successful!"));
-	}
-	
-	@ExceptionHandler(CitizenNotFoundException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(CitizenNotFoundException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.NOT_FOUND);
-	}
-
-	@ExceptionHandler(CuilAlreadyRegisteredException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(CuilAlreadyRegisteredException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(EmailAlreadyInUseException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(EmailAlreadyInUseException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(UnexistingRefreshTokenException.class)
-	public ResponseEntity<ErrorResponse> handleNullPointerExceptions(UnexistingRefreshTokenException exception) {
-		return new ResponseEntity<ErrorResponse>(new ErrorResponse(exception.getPath(), exception.getError(),
-				exception.getMessage(), exception.getStatus()), HttpStatus.FORBIDDEN);
 	}
 }

@@ -1,7 +1,5 @@
 package com.agprogramming.seom_v2_bff.advice;
 
-import java.util.Date;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,8 +12,8 @@ import com.agprogramming.seom_v2_bff.exceptions.UnexistingRefreshTokenException;
 public class TokenControllerAdvice {
 	@ExceptionHandler(value = UnexistingRefreshTokenException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
-	public ErrorMessage handleTokenRefreshException(UnexistingRefreshTokenException ex, WebRequest request) {
-		return new ErrorMessage(HttpStatus.FORBIDDEN.value(), new Date(), ex.getMessage(),
-				request.getDescription(false));
+	public ErrorResponse handleTokenRefreshException(UnexistingRefreshTokenException exception, WebRequest request) {
+		return new ErrorResponse(exception.getPath(), exception.getError(), exception.getMessage(),
+				exception.getStatus());
 	}
 }
