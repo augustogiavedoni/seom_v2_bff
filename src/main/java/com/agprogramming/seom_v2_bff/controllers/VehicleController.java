@@ -61,6 +61,7 @@ public class VehicleController {
 
 		ParkingTicket parkingTicket = new ParkingTicket();
 
+		parkingTicket.setUserCuil(vehicle.getOwnerCuil());
 		parkingTicket.setLicensePlate(request.getLicensePlate());
 		parkingTicket.setLatitude(request.getLatitude());
 		parkingTicket.setLongitude(request.getLongitude());

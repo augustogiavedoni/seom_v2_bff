@@ -1,6 +1,6 @@
 package com.agprogramming.seom_v2_bff.payloads.response;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -17,5 +17,5 @@ public class LoginResponse {
 	private String cuil;
 	private String email;
 	private List<String> roles;
-	private Date birthdate;
+	private LocalDate birthdate;
 }

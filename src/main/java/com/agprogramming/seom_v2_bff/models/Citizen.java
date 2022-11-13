@@ -1,6 +1,6 @@
 package com.agprogramming.seom_v2_bff.models;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -35,7 +35,7 @@ public class Citizen {
 	private String lastName;
 
 	@NotNull
-	private Date birthdate;
+	private LocalDate birthdate;
 
 	@NotBlank
 	@Size(max = 15)

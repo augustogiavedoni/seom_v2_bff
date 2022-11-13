@@ -1,7 +1,7 @@
 package com.agprogramming.seom_v2_bff.security.services;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -19,13 +19,13 @@ public class UserDetailsImpl implements UserDetails {
 	private String firstName;
 	private String lastName;
 	private String cuil;
-	private Date birthdate;
+	private LocalDate birthdate;
 	private String email;
 	@JsonIgnore
 	private String password;
 	private Collection<? extends GrantedAuthority> authorities;
 
-	public UserDetailsImpl(Long id, String firstName, String lastName, String cuil, Date birthdate, String email,
+	public UserDetailsImpl(Long id, String firstName, String lastName, String cuil, LocalDate birthdate, String email,
 			String password, Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.firstName = firstName;
@@ -56,7 +56,7 @@ public class UserDetailsImpl implements UserDetails {
 		return cuil;
 	}
 
-	public Date getBirthdate() {
+	public LocalDate getBirthdate() {
 		return birthdate;
 	}
 

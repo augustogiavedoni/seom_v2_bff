@@ -43,4 +43,8 @@ public class ParkingTicket {
 	@NotBlank
 	@Size(max = 20)
 	private String licensePlate;
+	
+	@NotBlank
+	@Size(max = 15)
+	private String userCuil;
 }

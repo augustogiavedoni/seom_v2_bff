@@ -16,8 +16,8 @@ public class AuthControllerAdvice {
 	@ExceptionHandler(CitizenNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	public ErrorResponse handleNullPointerExceptions(CitizenNotFoundException exception, WebRequest request) {
-		return new ErrorResponse(exception.getPath(), exception.getError(), exception.getMessage(),
-				exception.getStatus());
+		return new ErrorResponse(exception.getPath(), CitizenNotFoundException.error, CitizenNotFoundException.description,
+				CitizenNotFoundException.status);
 	}
 
 	@ExceptionHandler(CuilAlreadyRegisteredException.class)
