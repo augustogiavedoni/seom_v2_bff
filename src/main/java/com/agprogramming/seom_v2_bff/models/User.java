@@ -54,6 +54,9 @@ public class User {
 	@NotBlank
 	@Size(max = 15)
 	private String cuil;
+	
+	@NotBlank
+	private String stripeId;
 
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))

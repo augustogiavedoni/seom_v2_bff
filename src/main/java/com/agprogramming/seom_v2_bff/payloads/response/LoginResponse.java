@@ -18,4 +18,5 @@ public class LoginResponse {
 	private String email;
 	private List<String> roles;
 	private LocalDate birthdate;
+	private String stripeId;
 }

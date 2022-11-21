@@ -23,10 +23,11 @@ public class UserDetailsImpl implements UserDetails {
 	private String email;
 	@JsonIgnore
 	private String password;
+	private String stripeId;
 	private Collection<? extends GrantedAuthority> authorities;
 
 	public UserDetailsImpl(Long id, String firstName, String lastName, String cuil, LocalDate birthdate, String email,
-			String password, Collection<? extends GrantedAuthority> authorities) {
+			String password, String stripeId, Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -34,6 +35,7 @@ public class UserDetailsImpl implements UserDetails {
 		this.birthdate = birthdate;
 		this.email = email;
 		this.password = password;
+		this.stripeId = stripeId;
 		this.authorities = authorities;
 	}
 
@@ -41,7 +43,7 @@ public class UserDetailsImpl implements UserDetails {
 		List<GrantedAuthority> authorities = user.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
 		return new UserDetailsImpl(user.getId(), user.getFirstName(), user.getLastName(), user.getCuil(),
-				user.getBirthdate(), user.getEmail(), user.getPassword(), authorities);
+				user.getBirthdate(), user.getEmail(), user.getPassword(), user.getStripeId(), authorities);
 	}
 
 	public String getFirstName() {
@@ -66,6 +68,10 @@ public class UserDetailsImpl implements UserDetails {
 
 	public String getEmail() {
 		return email;
+	}
+	
+	public String getStripeId() {
+		return stripeId;
 	}
 
 	@Override

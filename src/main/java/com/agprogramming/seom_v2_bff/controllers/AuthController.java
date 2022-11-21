@@ -1,13 +1,16 @@
 package com.agprogramming.seom_v2_bff.controllers;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,6 +45,9 @@ import com.agprogramming.seom_v2_bff.repository.UserRepository;
 import com.agprogramming.seom_v2_bff.security.jwt.JwtUtils;
 import com.agprogramming.seom_v2_bff.security.services.RefreshTokenService;
 import com.agprogramming.seom_v2_bff.security.services.UserDetailsImpl;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.model.Customer;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -61,8 +67,10 @@ public class AuthController {
 	JwtUtils jwtUtils;
 	@Autowired
 	RefreshTokenService refreshTokenService;
+	@Value("${seom_auth.app.stripeApiKey}")
+	private String stripeApiKey;
 
-	@PostMapping("/signin")
+	@PostMapping("/sign-in")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
@@ -74,11 +82,11 @@ public class AuthController {
 		RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
 		return ResponseEntity.ok(new LoginResponse(jwt, refreshToken.getToken(), userDetails.getId(),
 				userDetails.getFirstName(), userDetails.getLastName(), userDetails.getCuil(), userDetails.getEmail(),
-				roles, userDetails.getBirthdate()));
+				roles, userDetails.getBirthdate(), userDetails.getStripeId()));
 	}
 
-	@PostMapping("/signup")
-	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	@PostMapping("/sign-up")
+	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) throws StripeException {
 		if (userRepository.existsByCuil(signUpRequest.getCuil())) {
 			throw new CuilAlreadyRegisteredException("/auth/signup");
 		} else if (userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -90,8 +98,10 @@ public class AuthController {
 
 		// Create new user's account
 		User user = new User(signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()),
-				citizen.getFirstName(), citizen.getLastName(), citizen.getBirthdate(),
-				citizen.getCuil());
+				citizen.getFirstName(), citizen.getLastName(), citizen.getBirthdate(), citizen.getCuil());
+		
+		createStripeCustomer(user);
+		
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet<>();
 
@@ -116,9 +126,27 @@ public class AuthController {
 		}
 
 		user.setRoles(roles);
+		
 		userRepository.save(user);
 
 		return authenticateUser(new LoginRequest(signUpRequest.getEmail(), signUpRequest.getPassword()));
+	}
+
+	private void createStripeCustomer(User user) throws StripeException {
+		Stripe.apiKey = stripeApiKey;
+		final String[] preferredLocales = {"es"};
+		final String fullName = user.getFirstName().concat(" ").concat(user.getLastName());
+
+		Map<String, Object> params = new HashMap<>();
+
+		params.put("email", user.getEmail());
+		params.put("name", fullName);
+		params.put("tax_exempt", "none");
+		params.put("preferred_locales", preferredLocales);
+		
+		Customer customer = Customer.create(params);
+		
+		user.setStripeId(customer.getId());
 	}
 
 	@PostMapping("/refreshtoken")
@@ -132,7 +160,7 @@ public class AuthController {
 				}).orElseThrow(() -> new UnexistingRefreshTokenException("/auth/refreshtoken"));
 	}
 
-	@PostMapping("/logout")
+	@PostMapping("/sign-out")
 	public ResponseEntity<?> logoutUser(@Valid @RequestBody LogoutRequest logOutRequest) {
 		refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 		return ResponseEntity.ok(new MessageResponse("Log out successful!"));

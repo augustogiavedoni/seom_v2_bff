@@ -23,21 +23,21 @@ public class AuthControllerAdvice {
 	@ExceptionHandler(CuilAlreadyRegisteredException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleNullPointerExceptions(CuilAlreadyRegisteredException exception, WebRequest request) {
-		return new ErrorResponse(exception.getPath(), exception.getError(), exception.getMessage(),
-				exception.getStatus());
+		return new ErrorResponse(exception.getPath(), CuilAlreadyRegisteredException.error, CuilAlreadyRegisteredException.description,
+				CuilAlreadyRegisteredException.status);
 	}
 
 	@ExceptionHandler(EmailAlreadyInUseException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse handleNullPointerExceptions(EmailAlreadyInUseException exception, WebRequest request) {
-		return new ErrorResponse(exception.getPath(), exception.getError(), exception.getMessage(),
-				exception.getStatus());
+		return new ErrorResponse(exception.getPath(), EmailAlreadyInUseException.error, EmailAlreadyInUseException.description,
+				EmailAlreadyInUseException.status);
 	}
 
 	@ExceptionHandler(UnexistingRefreshTokenException.class)
 	@ResponseStatus(HttpStatus.FORBIDDEN)
 	public ErrorResponse handleNullPointerExceptions(UnexistingRefreshTokenException exception, WebRequest request) {
-		return new ErrorResponse(exception.getPath(), exception.getError(), exception.getMessage(),
-				exception.getStatus());
+		return new ErrorResponse(exception.getPath(), UnexistingRefreshTokenException.error, UnexistingRefreshTokenException.description,
+				UnexistingRefreshTokenException.status);
 	}
 }
