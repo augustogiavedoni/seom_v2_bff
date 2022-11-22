@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public abstract class PaymentMethod {
+public abstract class SeomPaymentMethod {
 	private String type;
 }

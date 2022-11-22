@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @Data()
 @EqualsAndHashCode(callSuper=true)
-public class CreditCard extends PaymentMethod {
+public class CreditCard extends SeomPaymentMethod {
 	private String id;
 	private String brand;
 	@JsonProperty("expiry_month")

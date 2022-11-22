@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class SeomCashBalance extends PaymentMethod {
+public class SeomCashBalance extends SeomPaymentMethod {
 	private double balance;
 	
 	public SeomCashBalance() {
