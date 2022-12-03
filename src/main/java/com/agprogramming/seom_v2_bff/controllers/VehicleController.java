@@ -20,10 +20,12 @@ import com.agprogramming.seom_v2_bff.exceptions.ParkingTicketNotFoundException;
 import com.agprogramming.seom_v2_bff.exceptions.VehicleAlreadyParkedException;
 import com.agprogramming.seom_v2_bff.exceptions.VehicleNotFoundException;
 import com.agprogramming.seom_v2_bff.models.ParkingTicket;
+import com.agprogramming.seom_v2_bff.models.Receipt;
 import com.agprogramming.seom_v2_bff.models.Vehicle;
 import com.agprogramming.seom_v2_bff.payloads.request.ChangeParkingStatusRequest;
 import com.agprogramming.seom_v2_bff.payloads.request.StartParkingRequest;
 import com.agprogramming.seom_v2_bff.repository.ParkingTicketRepository;
+import com.agprogramming.seom_v2_bff.repository.ReceiptRepository;
 import com.agprogramming.seom_v2_bff.repository.VehicleRepository;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -35,7 +37,10 @@ public class VehicleController {
 
 	@Autowired
 	ParkingTicketRepository parkingTicketRepository;
-
+	
+	@Autowired
+	ReceiptRepository receiptRepository;
+	
 	@GetMapping()
 	public ResponseEntity<?> getVehicles(@Valid @RequestParam String userCuil) {
 		List<Vehicle> vehicles = vehicleRepository.findAllByOwnerCuil(userCuil);
@@ -74,20 +79,67 @@ public class VehicleController {
 	}
 
 	@RequestMapping(method = RequestMethod.PATCH, value = "/unpark")
-	public ResponseEntity<?> unparkVehicle(@Valid @RequestBody ChangeParkingStatusRequest request) {
+	public ResponseEntity<Vehicle> unparkVehicle(@Valid @RequestBody ChangeParkingStatusRequest request) {
 		ParkingTicket parkingTicket = parkingTicketRepository
 				.findByLicensePlateAndEndTime(request.getLicensePlate(), null)
-				.orElseThrow(() -> new ParkingTicketNotFoundException("/api/vehicles/park"));
+				.orElseThrow(() -> new ParkingTicketNotFoundException("/api/vehicles/unpark"));
 
 		Vehicle vehicle = vehicleRepository.findByLicensePlate(request.getLicensePlate())
-				.orElseThrow(() -> new VehicleNotFoundException("/api/vehicles/park"));
+				.orElseThrow(() -> new VehicleNotFoundException("/api/vehicles/unpark"));
 
-		parkingTicket.setEndTime(LocalTime.now());
 		vehicle.setParked(false);
+		parkingTicket.setEndTime(LocalTime.now());
+		
+		Receipt receipt = generateReceipt(vehicle, parkingTicket);
+		
+		parkingTicket.setReceipt(receipt);
 
 		parkingTicketRepository.save(parkingTicket);
 		vehicleRepository.save(vehicle);
 
 		return ResponseEntity.ok(vehicle);
+	}
+	
+	private Receipt generateReceipt(Vehicle vehicle, ParkingTicket parkingTicket) {
+		Receipt receipt = new Receipt();
+		float amount = calculateAmount(vehicle, parkingTicket);
+		
+		receipt.setDate(parkingTicket.getDate());
+		receipt.setAmount(String.valueOf(amount));
+		
+		if (amount == 0.0) {
+			receipt.setPaid(true);
+		} else {
+			receipt.setPaid(false);
+		}
+		
+		Receipt savedReceipt = receiptRepository.save(receipt);
+		
+		return savedReceipt;
+	}
+	
+	private float calculateAmount(Vehicle vehicle, ParkingTicket parkingTicket) {
+		int accumulatedTimeParked = vehicle.getTimeParked() + parkingTicket.getEndTime().compareTo(parkingTicket.getStartTime());
+		float amount = 0.0f;
+		
+		if (accumulatedTimeParked < 30) {
+			amount = 0.0f;
+		} else if (accumulatedTimeParked >= 30 && accumulatedTimeParked < 90) {
+			int minutesWithSecondRate = accumulatedTimeParked - 29;
+			
+			amount = minutesWithSecondRate * 0.5f;
+		} else if (accumulatedTimeParked >= 90 && accumulatedTimeParked < 150) {
+			int minutesWithThirdRate = accumulatedTimeParked - 89;
+			
+			amount = 59 * 0.5f + minutesWithThirdRate * 0.75f;
+		} else {
+			int minutesWithFourthRate = accumulatedTimeParked - 149;
+			
+			amount = 59 * 0.5f + 59 * 0.75f + minutesWithFourthRate * 1.0f;
+		}
+		
+		vehicle.setTimeParked(accumulatedTimeParked);
+		
+		return amount;
 	}
 }

@@ -51,4 +51,7 @@ public class Vehicle {
 	
 	@NotNull
 	private boolean isParked;
+	
+	@NotNull
+	private int timeParked;
 }
