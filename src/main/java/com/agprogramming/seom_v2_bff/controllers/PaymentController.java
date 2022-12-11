@@ -10,11 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.agprogramming.seom_v2_bff.exceptions.CardDeclinedException;
@@ -26,7 +24,6 @@ import com.agprogramming.seom_v2_bff.repository.ParkingTicketRepository;
 import com.agprogramming.seom_v2_bff.repository.ReceiptRepository;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Charge;
 import com.stripe.model.Customer;
 import com.stripe.model.CustomerBalanceTransaction;
 import com.stripe.model.PaymentIntent;
@@ -101,16 +98,5 @@ public class PaymentController {
 		Receipt updatedReceipt = receiptRepository.save(receipt);
 
 		return ResponseEntity.ok(updatedReceipt);
-	}
-
-	@GetMapping()
-	public ResponseEntity<?> getReceiptUrl(@Valid @RequestParam String chargeId) throws StripeException {
-		Stripe.apiKey = stripeApiKey;
-
-		Charge charge = Charge.retrieve(chargeId);
-
-		String receiptUrl = charge.getReceiptUrl();
-
-		return ResponseEntity.ok(receiptUrl);
 	}
 }
