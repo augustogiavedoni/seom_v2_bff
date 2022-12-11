@@ -105,7 +105,7 @@ public class VehicleController {
 		float amount = calculateAmount(vehicle, parkingTicket);
 		
 		receipt.setDate(parkingTicket.getDate());
-		receipt.setAmount(String.valueOf(amount));
+		receipt.setAmount(String.format("%.2f", amount));
 		
 		if (amount == 0.0) {
 			receipt.setPaid(true);
@@ -120,7 +120,7 @@ public class VehicleController {
 	
 	private float calculateAmount(Vehicle vehicle, ParkingTicket parkingTicket) {
 		int accumulatedTimeParked = vehicle.getTimeParked() + parkingTicket.getEndTime().compareTo(parkingTicket.getStartTime());
-		float amount = 0.0f;
+		float amount = 0.00f;
 		
 		if (accumulatedTimeParked < 30) {
 			amount = 0.0f;

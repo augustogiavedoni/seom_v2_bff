@@ -24,7 +24,7 @@ public class ParkingTicketController {
 	
 	@GetMapping()
 	public ResponseEntity<?> getRecentyActivity(@Valid @RequestParam String userCuil) {
-		List<ParkingTicket> parkingTickets = parkingTicketRepository.findByUserCuil(userCuil);
+		List<ParkingTicket> parkingTickets = parkingTicketRepository.findByUserCuilAndEndTimeNotNull(userCuil);
 		
 		return ResponseEntity.ok(parkingTickets);
 	}

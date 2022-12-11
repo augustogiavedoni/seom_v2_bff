@@ -10,5 +10,5 @@ import com.agprogramming.seom_v2_bff.models.ParkingTicket;
 
 public interface ParkingTicketRepository extends JpaRepository<ParkingTicket, Long>{
 	Optional<ParkingTicket> findByLicensePlateAndEndTime(String licensePlate, LocalTime endTime);
-	List<ParkingTicket> findByUserCuil(String userCuil);
+	List<ParkingTicket> findByUserCuilAndEndTimeNotNull(String userCuil);
 }

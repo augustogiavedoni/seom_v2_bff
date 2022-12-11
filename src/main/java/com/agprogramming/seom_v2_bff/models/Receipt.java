@@ -33,4 +33,7 @@ public class Receipt {
 	private boolean paid;
 	
 	private String chargeId;
+	
+	@NotNull
+	private boolean hasGeneratedReceipt;
 }
